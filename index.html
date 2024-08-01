@@ -3,10 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bla</title>
+    <title>L'Eteernnel cycle de la Viya</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="LogoViya.png" type="image/png">
 </head>
 <body>
-    <div id="title">bla</div>
+    <div id="title">L'Eteernnel cycle de la Viya</div>
+    <button id="play-button">Play Music</button>
+    <audio id="background-music" src="PunchDeck_Destabilized.mp3" loop></audio>
+    <canvas id="three-canvas"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+    let scene, camera, renderer;
+let blocks, particles, pathLine, logo, orbitingImages;
+let clock;
+
+init();
+animate();
+
+function init() {
+    // Initialisation de la scène, caméra et renderer
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 20;
+
+    renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas') });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    // Initialisation du clock pour gérer le temps
+    clock = new THREE.Clock();
+
+    // Textes à afficher
+    const texts = [
+        "Un Monde imaginaire et sans limite !",
+        "Un multivers incroyable à disposition de chaque joueur",
+        "Un MMO révolutionnaire, narrant la fabuleuse histoire de la Via",
+        "Bientôt disponible !"
+    ];
+    
+    // Positions des blocs
+    const positions = [
+        { x: -5, y: 0, z: -10 },
+        { x: 5, y: 0, z: -20 },
+        { x: -5, y: 0, z: -30 },
+        { x: 5, y: 0, z: -40 }
+    ];
+
+    blocks = [];
+    texts.forEach((text, i) => {
+        const texture = createTextTexture(text);
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+        const geometry = new THREE.PlaneGeometry(5, 2);
+        const plane = new THREE.Mesh(geometry, material);
+        plane.position.set(positions[i].x, positions[i].y, positions[i].z);
+        scene.add(plane);
+        blocks.push(plane);
+    });
+
+    // Ajouter le logo central
+    const logoTexture = new THREE.TextureLoader().load('LogoViya.png');
+    const logoMaterial = new THREE.MeshBasicMaterial({ map: logoTexture, transparent: true });
+    const logoGeometry = new THREE.PlaneGeometry(10, 10);
+    logo = new THREE.Mesh(logoGeometry, logoMaterial);
+    logo.position.set(0, 0, -50); // Positionner le logo central
+    scene.add(logo);
+
+    // Ajouter des images gravitant autour du logo
+    const imageFiles = ['1.jpg', '2.jpg', '5.jpg', '8.jpg', '4.jpg', '7.jpg', '9.jpg', '10.jpg'];
+    orbitingImages = [];
+    imageFiles.forEach((file, index) => {
+        const texture = new THREE.TextureLoader().load(file);
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const geometry = new THREE.PlaneGeometry(5, 5);
+        const image = new THREE.Mesh(geometry, material);
+        
+        // Position initiale aléatoire autour du logo
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 15; // Distance du logo
+        image.position.set(
+            Math.cos(angle) * radius,
+            Math.sin(angle) * radius,
+            logo.position.z
+        );
+        scene.add(image);
+        orbitingImages.push({ mesh: image, angle, radius });
+    });
+
+    // Ajouter des particules avec mouvement
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 4000;
+    const positionsArray = new Float32Array(particlesCount * 3);
+    const velocitiesArray = new Float32Array(particlesCount * 3);
+    const spreadX = 20;  // Écartement sur l'axe X
+    const spreadY = 20;  // Écartement sur l'axe Y
+    const spreadZ = 200; // Écartement sur l'axe Z (augmenté)
+
+    for (let i = 0; i < particlesCount; i++) {
+        positionsArray[i * 3] = (Math.random() - 0.5) * spreadX;
+        positionsArray[i * 3 + 1] = (Math.random() - 0.5) * spreadY;
+        positionsArray[i * 3 + 2] = (Math.random() - 0.5) * spreadZ;
+
+        // Vitesse aléatoire pour chaque particule
+        velocitiesArray[i * 3] = (Math.random() - 0.5) * 0.02;
+        velocitiesArray[i * 3 + 1] = (Math.random() - 0.5) * 0.02;
+        velocitiesArray[i * 3 + 2] = (Math.random() - 0.5) * 0.02;
+    }
+
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positionsArray, 3));
+    particlesGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocitiesArray, 3));
+
+    const particlesMaterial = new THREE.PointsMaterial({ color: 0x00aaff, size: 0.05 });
+    particles = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particles);
+
+    // Ajouter la ligne de chemin
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, -5),
+        new THREE.Vector3(0, 0, -50)
+    ]);
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
+    pathLine = new THREE.Line(lineGeometry, lineMaterial);
+    scene.add(pathLine);
+
+    // Gestion du défilement
+    window.addEventListener('wheel', onScroll);
+
+    // Ajouter un bouton de lecture pour déclencher la musique
+    const playButton = document.getElementById('play-button');
+    playButton.addEventListener('click', () => {
+        document.getElementById('background-music').play();
+        playButton.style.display = 'none'; // Cacher le bouton après l'interaction
+    });
+
+    window.addEventListener('resize', onWindowResize, false);
+}
+
+function createTextTexture(text) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const fontSize = 40; // Taille de la police
+    const padding = 20; // Marge pour éviter de couper le texte
+
+    context.font = `Bold ${fontSize}px Arial`;
+
+    // Calculer la taille nécessaire du canvas pour le texte
+    const textMetrics = context.measureText(text);
+    const textWidth = textMetrics.width;
+    const canvasWidth = textWidth + padding * 2;
+    const canvasHeight = fontSize + padding * 2;
+
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    // Redéfinir les propriétés du contexte après redimensionnement du canvas
+    context.font = `Bold ${fontSize}px Arial`;
+    context.fillStyle = 'white';
+    context.textBaseline = 'top'; // Assure que le texte commence au sommet du canvas
+    context.fillText(text, padding, padding); // Dessiner le texte avec une marge
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+
+    return texture;
+}
+
+function onScroll(event) {
+    const delta = Math.sign(event.deltaY) * 1;
+    camera.position.z += delta;
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    updateParticles(); // Mettre à jour les particules
+    updateOrbitingImages(); // Mettre à jour les images en orbite
+    renderer.render(scene, camera);
+}
+
+function updateParticles() {
+    const positions = particles.geometry.attributes.position.array;
+    const velocities = particles.geometry.attributes.velocity.array;
+    const time = clock.getElapsedTime();
+
+    for (let i = 0; i < positions.length; i += 3) {
+        positions[i] += velocities[i];
+        positions[i + 1] += velocities[i + 1];
+        positions[i + 2] += velocities[i + 2];
+
+        positions[i] += Math.sin(time + i) * 0.001;
+        positions[i + 1] += Math.cos(time + i) * 0.001;
+    }
+
+    particles.geometry.attributes.position.needsUpdate = true; // Nécessaire pour mettre à jour les positions
+}
+
+function updateOrbitingImages() {
+    const time = clock.getElapsedTime();
+    orbitingImages.forEach((obj, index) => {
+        // Mettre à jour l'angle pour créer un mouvement d'orbite
+        obj.angle += 0.01; // Vitesse de rotation
+        obj.mesh.position.x = Math.cos(obj.angle) * obj.radius;
+        obj.mesh.position.y = Math.sin(obj.angle) * obj.radius;
+        obj.mesh.position.z = logo.position.z + Math.sin(time + index) * 5; // Mouvement vertical oscillant
+    });
+}
+</script>
 </body>
 </html>
