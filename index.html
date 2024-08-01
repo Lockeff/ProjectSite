@@ -158,18 +158,21 @@ function handleTouchEnd(event) {
   handleSwipeGesture();
 }
 
+// Variable pour stocker la position cible de la caméra
+let targetZ = camera.position.z;
+
 // Fonction pour déterminer le geste de balayage
 function handleSwipeGesture() {
   const swipeDistance = touchStartY - touchEndY;
 
   if (swipeDistance > 50) {
-    // Balayage vers le haut
-    camera.position.z -= 1;
-    console.log('Avancer la caméra');
+    // Balayage vers le haut - avancer la caméra
+    targetZ -= swipeDistance / 10; // Ajuster la division pour moduler la sensibilité
+    console.log('Avancer la caméra de', swipeDistance / 10);
   } else if (swipeDistance < -50) {
-    // Balayage vers le bas
-    camera.position.z += 1;
-    console.log('Reculer la caméra');
+    // Balayage vers le bas - reculer la caméra
+    targetZ -= swipeDistance / 10; // Ajuster la division pour moduler la sensibilité
+    console.log('Reculer la caméra de', swipeDistance / 10);
   }
 }
 
@@ -222,6 +225,7 @@ function animate() {
     requestAnimationFrame(animate);
     updateParticles(); // Mettre à jour les particules
     updateOrbitingImages(); // Mettre à jour les images en orbite
+    camera.position.z += (targetZ - camera.position.z) * 0.1;
     renderer.render(scene, camera);
 }
 
