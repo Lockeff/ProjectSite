@@ -137,7 +137,43 @@ function init() {
     });
 
     window.addEventListener('resize', onWindowResize, false);
+
+    // Ajouter les écouteurs d'événements à l'élément du rendu
+renderer.domElement.addEventListener('touchstart', handleTouchStart, false);
+renderer.domElement.addEventListener('touchend', handleTouchEnd, false);
 }
+
+// Variables pour stocker les coordonnées initiales et finales du toucher
+let touchStartY = 0;
+let touchEndY = 0;
+
+// Fonction pour gérer le début du toucher
+function handleTouchStart(event) {
+  touchStartY = event.changedTouches[0].screenY;
+}
+
+// Fonction pour gérer la fin du toucher
+function handleTouchEnd(event) {
+  touchEndY = event.changedTouches[0].screenY;
+  handleSwipeGesture();
+}
+
+// Fonction pour déterminer le geste de balayage
+function handleSwipeGesture() {
+  const swipeDistance = touchStartY - touchEndY;
+
+  if (swipeDistance > 50) {
+    // Balayage vers le haut
+    camera.position.z -= 1;
+    console.log('Avancer la caméra');
+  } else if (swipeDistance < -50) {
+    // Balayage vers le bas
+    camera.position.z += 1;
+    console.log('Reculer la caméra');
+  }
+}
+
+
 
 function createTextTexture(text) {
     const canvas = document.createElement('canvas');
