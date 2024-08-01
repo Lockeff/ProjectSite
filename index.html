@@ -10,8 +10,7 @@
 <body>
     <div id="title">Ashron ! come save us</div>
     <div class="credits">PunchDeck_Destabilized</div>
-    <button id="play-button">Play Music</button>
-    <audio id="background-music" src="PunchDeck_Destabilized.mp3" loop></audio>
+    <audio id="background-music" src="PunchDeck_Destabilized.mp3"  preload="auto" loop></audio>
     <canvas id="three-canvas"></canvas>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -21,6 +20,18 @@ let blocks, particles, pathLine, logo, orbitingImages;
 let clock;
 let targetZ
 
+document.addEventListener('DOMContentLoaded', function() {
+            const backgroundMusic = document.getElementById('background-music');
+            
+            function playMusic() {
+                backgroundMusic.play().catch(error => {
+                    console.error('Error playing music:', error);
+                });
+                document.removeEventListener('click', playMusic);
+            }
+            
+            document.addEventListener('click', playMusic)
+         });
 
 init();
 animate();
@@ -132,13 +143,6 @@ function init() {
 
     // Gestion du défilement
     window.addEventListener('wheel', onScroll);
-
-    // Ajouter un bouton de lecture pour déclencher la musique
-    const playButton = document.getElementById('play-button');
-    playButton.addEventListener('click', () => {
-        document.getElementById('background-music').play();
-        playButton.style.display = 'none'; // Cacher le bouton après l'interaction
-    });
 
     window.addEventListener('resize', onWindowResize, false);
 
