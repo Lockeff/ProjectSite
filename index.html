@@ -53,16 +53,18 @@ function init() {
     const texts = [
         "Un Monde imaginaire et sans limite !",
         "Un multivers incroyable à disposition de chaque joueur",
-        "Un MMO révolutionnaire, narrant la fabuleuse histoire de la Via",
-        "Bientôt disponible !"
+        "Un MMO révolutionnaire, narrant la fabuleuse histoire de la Viya",
+        "La concrétisation d'un rêve by Lockeff",
+        "2026"
     ];
     
     // Positions des blocs
     const positions = [
-        { x: -5, y: 0, z: -10 },
-        { x: 5, y: 0, z: -20 },
-        { x: -5, y: 0, z: -30 },
-        { x: 5, y: 0, z: -40 }
+        { x: -2, y: 0, z: -10 },
+        { x: 2, y: 0, z: -20 },
+        { x: -2, y: 0, z: -30 },
+        { x: 2, y: 0, z: -40 },
+        { x: 0, y: 0, z: -50 }
     ];
 
     blocks = [];
@@ -81,7 +83,7 @@ function init() {
     const logoMaterial = new THREE.MeshBasicMaterial({ map: logoTexture, transparent: true });
     const logoGeometry = new THREE.PlaneGeometry(10, 10);
     logo = new THREE.Mesh(logoGeometry, logoMaterial);
-    logo.position.set(0, 0, -50); // Positionner le logo central
+    logo.position.set(0, 0, -60); // Positionner le logo central
     scene.add(logo);
 
     // Ajouter des images gravitant autour du logo
@@ -187,7 +189,7 @@ function createTextTexture(text) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     const fontSize = 40; // Taille de la police
-    const padding = 20; // Marge pour éviter de couper le texte
+    const padding = 100; // Marge pour éviter de couper le texte
 
     context.font = `Bold ${fontSize}px Arial`;
 
@@ -217,7 +219,7 @@ function createTextTexture(text) {
 
 function onScroll(event) {
     const delta = Math.sign(event.deltaY) * 1;
-    camera.position.z += delta;
+    targetZ += delta;
 }
 
 function onWindowResize() {
