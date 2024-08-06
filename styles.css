@@ -22,12 +22,23 @@ body, html {
     font-size: 16px;
     cursor: pointer;
 }
-.credits{
-        position: fixed;
-        width: 100%;
-        text-align: center;
-        font-size: 10px;
-        color: skyblue;
-        font-weight: bold;
-        bottom: 0px;
+.credits {
+    position: fixed;
+    left: 40%;
+    width: 20%;
+    text-align: center;
+    font-size: 10px;
+    color: skyblue;
+    font-weight: bold;
+    bottom: 5px;
+    cursor: pointer; /* Ajoute le curseur de la main pour indiquer que c'est cliquable */
+    background-color: #333; /* Couleur de fond pour le bouton */
+    padding: 10px; /* Ajouter un padding pour rendre le bouton plus grand */
+    border: none; /* Supprimer les bordures par défaut */
+    border-radius: 5px; /* Ajouter des coins arrondis */
+    transition: background-color 0.3s; /* Ajouter une transition pour l'effet de survol */
+}
+
+.credits:hover {
+    background-color: #555; /* Changer la couleur de fond au survol */
 }
